@@ -1,12 +1,14 @@
+import re
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from authlib.integrations.starlette_client import OAuth
 from app.core import security
 from app.core.config import settings
-from app.core.dependencies import get_db
+from app.core.dependencies import get_db, get_current_user, get_43h_student
 from app.models.user import User
 from app.schemas.token import Token
+from app.schemas.user import UserOut
 
 router = APIRouter()
 
@@ -20,6 +22,19 @@ oauth.register(
         'scope': 'openid email profile'
     }
 )
+
+@router.get("/me", response_model=UserOut)
+async def get_me(current_user: User = Depends(get_current_user)):
+    """Get current user info"""
+    return current_user
+
+@router.get("/users", response_model=list[UserOut])
+async def get_all_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_43h_student)
+):
+    """Get all 43-H users (Role >= 2)"""
+    return db.query(User).filter(User.role >= 2).all()
 
 @router.get("/login")
 async def login(request: Request):
@@ -44,22 +59,38 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
             detail="Access restricted to DIU email addresses (@diu.edu.bd)"
         )
     
+    # Extract student ID (format: 242-35-213)
+    id_pattern = r"\b\d{3}-\d{2}-\d{3}\b"
+    id_match = re.search(id_pattern, email)
+    
+    raw_name = user_info.get('name', 'DIU Student')
+    if not id_match:
+        id_match = re.search(id_pattern, raw_name)
+    
+    student_id = id_match.group(0) if id_match else email.split('@')[0]
+    
+    # Clean and Format Name: remove student ID, strip, and Title Case
+    clean_name = re.sub(id_pattern, "", raw_name).strip().title()
+    
     user = db.query(User).filter(User.email == email).first()
     
     if not user:
         # Auto-create new user with role 1
         user = User(
-            name=user_info.get('name', 'DIU Student'),
+            name=clean_name,
             email=email,
-            student_id=email.split('@')[0], # Fallback student_id from email
+            student_id=student_id,
             phone="",
-            role=1 # Any DIU Student
+            role=1
         )
         db.add(user)
         db.commit()
         db.refresh(user)
+    else:
+        # Update existing user info if it changed
+        user.name = clean_name
+        user.student_id = student_id
+        db.commit()
     
     access_token = security.create_access_token(user.email)
-    
-    # Redirect to frontend login page with token so JS can store it
     return RedirectResponse(url=f"/login?token={access_token}")

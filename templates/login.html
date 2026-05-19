@@ -17,17 +17,23 @@
 </div>
 
 <script>
-    // Since the API returns the token as JSON on callback, 
-    // we would usually need to handle the token retrieval.
-    // For this simple demo, we'll assume the user is redirected back.
-    // In a full implementation, the callback would redirect to /dashboard?token=...
-    // and this script would pick it up.
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    if (token) {
-        localStorage.setItem('token', token);
-        window.location.href = '/dashboard';
-    }
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log("Login page loaded, checking for token in URL...");
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        
+        if (token) {
+            console.log("Token detected in URL, saving to localStorage and redirecting...");
+            localStorage.setItem('token', token);
+            window.location.href = '/dashboard';
+        } else {
+            console.log("No token found in URL.");
+            // Also check if already logged in
+            if (localStorage.getItem('token')) {
+                console.log("Token found in localStorage, redirecting to dashboard...");
+                window.location.href = '/dashboard';
+            }
+        }
+    });
 </script>
 {% endblock %}

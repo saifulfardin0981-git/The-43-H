@@ -16,3 +16,7 @@ async def login_page(request: Request):
 @router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard_page(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
+
+@router.get("/directory", response_class=HTMLResponse)
+async def directory_page(request: Request):
+    return templates.TemplateResponse("directory.html", {"request": request})

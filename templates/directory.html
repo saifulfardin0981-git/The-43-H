@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Student Directory - UniPortal{% endblock %}
+
+{% block nav %}
+<button onclick="logout()" class="hover:underline">Logout</button>
+{% endblock %}
+
+{% block content %}
+<div id="mainContent" class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 text-center mb-8">Student Directory (43-H)</h1>
+    
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                </tr>
+            </thead>
+            <tbody id="userList" class="bg-white divide-y divide-gray-200">
+                <tr>
+                    <td colspan="3" class="px-6 py-4 text-center text-gray-500 animate-pulse">Loading directory...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function loadDirectory() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.warn("No token found, redirecting to login");
+            window.location.href = '/login';
+            return;
+        }
+
+        try {
+            console.log("Fetching student directory...");
+            const response = await fetch('/api/auth/users', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.status === 401) {
+                console.error("Unauthorized: Token invalid or expired");
+                logout();
+                return;
+            }
+
+            if (response.status === 403) {
+                console.error("Forbidden: Role >= 2 required");
+                document.getElementById('mainContent').innerHTML = `
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                        <strong class="font-bold">Access Denied!</strong>
+                        <span class="block sm:inline"> Only 43-H students and staff can access this directory.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+
+            const users = await response.json();
+            console.log(`Loaded ${users.length} users`);
+            const listBody = document.getElementById('userList');
+            
+            if (users.length === 0) {
+                listBody.innerHTML = '<tr><td colspan="3" class="px-6 py-4 text-center text-gray-500 italic">No students found in 43-H directory.</td></tr>';
+                return;
+            }
+
+            listBody.innerHTML = users.map(user => {
+                // Name clean-up and CR tag
+                let displayName = user.name || 'N/A';
+                if (user.role === 3) {
+                    displayName += ` <span class="text-gray-400 text-sm ml-2 font-semibold">(CR)</span>`;
+                }
+
+                return `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">${user.student_id || 'N/A'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${displayName}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.email}</td>
+                    </tr>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('Error loading directory:', error);
+            document.getElementById('userList').innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-red-500">Error loading directory. Check console.</td></tr>`;
+        }
+    }
+
+    loadDirectory();
+</script>
+{% endblock %}
