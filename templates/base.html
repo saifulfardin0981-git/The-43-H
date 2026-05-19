@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}University Portal{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <nav class="bg-blue-600 p-4 text-white shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-xl font-bold">UniPortal</a>
+            <div>
+                {% block nav %}{% endblock %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto flex-grow p-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 p-6 text-white text-center">
+        <div class="mb-4">
+            <!-- Minimal Ad Placeholder -->
+            <div id="ad-placeholder" class="bg-gray-700 p-4 inline-block rounded text-gray-400">
+                <p>Advertisement Space</p>
+                <!-- Add script tag here in the future -->
+                {% block ad_script %}{% endblock %}
+            </div>
+        </div>
+        <p>&copy; 2026 University Portal. All rights reserved.</p>
+    </footer>
+</body>
+</html>

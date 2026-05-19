@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - UniPortal{% endblock %}
+
+{% block nav %}
+<button onclick="logout()" class="hover:underline">Logout</button>
+{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-900">Class Updates</h1>
+    <div id="roleBadge" class="hidden px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800"></div>
+</div>
+
+<div id="updatesList" class="space-y-6">
+    <!-- Updates will be loaded here via JavaScript -->
+    <div class="animate-pulse flex space-x-4">
+        <div class="flex-1 space-y-4 py-1">
+            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div class="space-y-2">
+                <div class="h-4 bg-gray-200 rounded"></div>
+                <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+    }
+
+    async function loadUpdates() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        const response = await fetch('/api/class-updates/', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.status === 401) {
+            logout();
+            return;
+        }
+
+        const updates = await response.json();
+        const listDiv = document.getElementById('updatesList');
+        
+        if (updates.length === 0) {
+            listDiv.innerHTML = '<p class="text-gray-500 text-center italic">No class updates available.</p>';
+            return;
+        }
+
+        listDiv.innerHTML = updates.map(update => `
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <h2 class="text-xl font-semibold text-blue-600">${update.course_name}</h2>
+                    <span class="text-sm text-gray-500">${update.date}</span>
+                </div>
+                <div class="text-gray-700 mb-4">
+                    <h3 class="font-medium text-gray-900 mb-1">Topics Covered:</h3>
+                    <p>${update.topics_covered}</p>
+                </div>
+                ${update.resources_link ? `
+                    <a href="${update.resources_link}" target="_blank" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800">
+                        View Resources
+                        <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                ` : ''}
+            </div>
+        `).join('');
+    }
+
+    loadUpdates();
+</script>
+{% endblock %}
