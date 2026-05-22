@@ -4,7 +4,7 @@ from typing import List
 from app.core.dependencies import get_db, get_current_user, get_current_cr
 from app.models.notice import Notice
 from app.models.user import User
-from app.schemas.notice import NoticeCreate, NoticeResponse
+from app.schemas.notice import NoticeCreate, NoticeResponse, NoticeUpdate
 
 router = APIRouter()
 
@@ -26,12 +26,33 @@ def create_notice(
     new_notice = Notice(
         title=notice_in.title,
         content=notice_in.content,
+        resources_link=notice_in.resources_link,
         author_name=current_user.name
     )
     db.add(new_notice)
     db.commit()
     db.refresh(new_notice)
     return new_notice
+
+@router.patch("/{notice_id}", response_model=NoticeResponse)
+def update_notice(
+    notice_id: int,
+    notice_update: NoticeUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_cr)
+):
+    """Update a notice (CR/Admin only)"""
+    notice = db.query(Notice).filter(Notice.id == notice_id).first()
+    if not notice:
+        raise HTTPException(status_code=404, detail="Notice not found")
+    
+    update_data = notice_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(notice, key, value)
+    
+    db.commit()
+    db.refresh(notice)
+    return notice
 
 @router.delete("/{notice_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_notice(
