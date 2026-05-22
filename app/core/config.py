@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "University Portal API"
+    PROJECT_NAME: str = "43-H API"
     # To run locally with SQLite as fallback, but designed for Postgres
     DATABASE_URL: str = "sqlite:///./test.db" 
     SECRET_KEY: str = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7" # Example key, change in prod
