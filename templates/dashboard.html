@@ -9,11 +9,16 @@
 {% block content %}
 <div class="mb-8 flex justify-between items-center">
     <h1 class="text-3xl font-bold text-gray-900">Class Updates</h1>
-    <div id="roleBadge" class="hidden px-3 py-1 rounded-full text-xs font-semibold"></div>
+    <div class="flex items-center space-x-2">
+        <button id="editProfileBtn" onclick="toggleProfileSection()" class="hidden px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-xs font-medium hover:bg-gray-300 transition-colors">
+            Edit Profile
+        </button>
+        <div id="roleBadge" class="hidden px-3 py-1 rounded-full text-xs font-semibold"></div>
+    </div>
 </div>
 
 <!-- Profile Section: Update Blood Group -->
-<div class="mb-10 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+<div id="profileSection" class="mb-10 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
     <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
         <svg class="w-5 h-5 mr-2 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
         Your Profile
@@ -128,10 +133,20 @@
             const user = await userResponse.json();
             console.log("User loaded:", user.email, "Role:", user.role);
             
-            // Set current blood group in dropdown
+            // Set current blood group in dropdown and hide section if already set
+            const profileSection = document.getElementById('profileSection');
+            const editProfileBtn = document.getElementById('editProfileBtn');
             const bloodGroupSelect = document.getElementById('bloodGroupSelect');
             if (bloodGroupSelect) {
-                bloodGroupSelect.value = user.blood_group || 'Unknown';
+                const bg = user.blood_group || 'Unknown';
+                bloodGroupSelect.value = bg;
+                if (bg !== 'Unknown') {
+                    profileSection.classList.add('hidden');
+                    editProfileBtn.classList.remove('hidden');
+                } else {
+                    profileSection.classList.remove('hidden');
+                    editProfileBtn.classList.add('hidden');
+                }
             }
 
             const badge = document.getElementById('roleBadge');
@@ -188,6 +203,18 @@
         } catch (error) {
             console.error('Error loading dashboard:', error);
             document.getElementById('updatesList').innerHTML = `<p class="text-red-500 text-center">Error loading updates. Please check console.</p>`;
+        }
+    }
+
+    function toggleProfileSection() {
+        const profileSection = document.getElementById('profileSection');
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        if (profileSection.classList.contains('hidden')) {
+            profileSection.classList.remove('hidden');
+            editProfileBtn.textContent = 'Cancel Edit';
+        } else {
+            profileSection.classList.add('hidden');
+            editProfileBtn.textContent = 'Edit Profile';
         }
     }
 
