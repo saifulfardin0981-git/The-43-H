@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 from app.core.config import settings
-from app.api.routers import auth, class_updates, frontend
+from app.api.routers import auth, class_updates, frontend, notices
 from app.database import engine, Base
 from app.models import User, ClassUpdate
+from app.models.notice import Notice # Ensure Notice model is imported for metadata
 
 # Create database tables for boilerplate purposes
 Base.metadata.create_all(bind=engine)
@@ -19,3 +20,4 @@ app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY_SESSION)
 app.include_router(frontend.router, tags=["frontend"])
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(class_updates.router, prefix="/api/class-updates", tags=["class updates"])
+app.include_router(notices.router, prefix="/api/notices", tags=["notices"])
