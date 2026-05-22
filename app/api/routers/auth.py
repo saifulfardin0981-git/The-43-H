@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 from authlib.integrations.starlette_client import OAuth
 from app.core import security
 from app.core.config import settings
-from app.core.dependencies import get_db, get_current_user, get_43h_student
+from app.core.dependencies import get_db, get_current_user, get_43h_student, get_absolute_admin
 from app.models.user import User
 from app.schemas.token import Token
-from app.schemas.user import UserOut
+from app.schemas.user import UserOut, UserRoleUpdate
 
 router = APIRouter()
 
@@ -35,6 +35,34 @@ async def get_all_users(
 ):
     """Get all 43-H users (Role >= 2)"""
     return db.query(User).filter(User.role >= 2).all()
+
+@router.get("/admin/users", response_model=list[UserOut])
+async def admin_get_all_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_absolute_admin)
+):
+    """Admin: Get all users in the database"""
+    return db.query(User).all()
+
+@router.patch("/users/{user_email}/role", response_model=UserOut)
+async def update_user_role(
+    user_email: str,
+    role_update: UserRoleUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_absolute_admin)
+):
+    """Admin: Update target user's role"""
+    if role_update.role < 1 or role_update.role > 4:
+        raise HTTPException(status_code=400, detail="Invalid role. Must be between 1 and 4.")
+    
+    user = db.query(User).filter(User.email == user_email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user.role = role_update.role
+    db.commit()
+    db.refresh(user)
+    return user
 
 @router.get("/login")
 async def login(request: Request):

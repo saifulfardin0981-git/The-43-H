@@ -52,6 +52,29 @@
     </div>
 </div>
 
+<!-- Admin Section: Manage Roles -->
+<div id="adminSection" class="hidden mt-12 bg-white p-6 rounded-lg shadow-sm border border-red-100">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <svg class="w-6 h-6 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        Manage User Roles
+    </h2>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                </tr>
+            </thead>
+            <tbody id="adminUserList" class="bg-white divide-y divide-gray-200">
+                <!-- User rows will be injected here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <script>
     async function loadUserAndUpdates() {
         const token = localStorage.getItem('token');
@@ -85,6 +108,11 @@
 
             if (user.role >= 3) {
                 document.getElementById('postUpdateSection').classList.remove('hidden');
+            }
+
+            if (user.role === 4) {
+                document.getElementById('adminSection').classList.remove('hidden');
+                loadAdminUsers(user.email);
             }
 
             console.log("Fetching class updates...");
@@ -125,6 +153,67 @@
         } catch (error) {
             console.error('Error loading dashboard:', error);
             document.getElementById('updatesList').innerHTML = `<p class="text-red-500 text-center">Error loading updates. Please check console.</p>`;
+        }
+    }
+
+    async function loadAdminUsers(currentAdminEmail) {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch('/api/auth/admin/users', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const users = await response.json();
+            const adminUserList = document.getElementById('adminUserList');
+            
+            adminUserList.innerHTML = users.map(user => `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${user.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <select id="role-${user.email}" ${user.email === currentAdminEmail ? 'disabled' : ''} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm p-1 border">
+                            <option value="1" ${user.role === 1 ? 'selected' : ''}>Role 1: General Student</option>
+                            <option value="2" ${user.role === 2 ? 'selected' : ''}>Role 2: 43-H Student</option>
+                            <option value="3" ${user.role === 3 ? 'selected' : ''}>Role 3: CR</option>
+                            <option value="4" ${user.role === 4 ? 'selected' : ''}>Role 4: Admin</option>
+                        </select>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="updateUserRole('${user.email}')" ${user.email === currentAdminEmail ? 'disabled' : ''} class="${user.email === currentAdminEmail ? 'bg-gray-300 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'} text-white py-1 px-3 rounded text-xs transition-colors">
+                            Update
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading admin users:', error);
+        }
+    }
+
+    async function updateUserRole(email) {
+        const token = localStorage.getItem('token');
+        const role = parseInt(document.getElementById(`role-${email}`).value);
+
+        try {
+            const response = await fetch(`/api/auth/users/${email}/role`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ role: role })
+            });
+
+            if (response.ok) {
+                alert(`Role updated successfully for ${email}`);
+                // Refresh the list to reflect changes (though it should already match the select value)
+                loadUserAndUpdates(); 
+            } else {
+                const errData = await response.json();
+                alert('Failed to update role: ' + (errData.detail || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error updating role:', error);
+            alert('An error occurred while updating the role.');
         }
     }
 
