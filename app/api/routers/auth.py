@@ -8,7 +8,7 @@ from app.core.config import settings
 from app.core.dependencies import get_db, get_current_user, get_43h_student, get_absolute_admin
 from app.models.user import User
 from app.schemas.token import Token
-from app.schemas.user import UserOut, UserRoleUpdate
+from app.schemas.user import UserOut, UserRoleUpdate, UserUpdate
 
 router = APIRouter()
 
@@ -26,6 +26,26 @@ oauth.register(
 @router.get("/me", response_model=UserOut)
 async def get_me(current_user: User = Depends(get_current_user)):
     """Get current user info"""
+    return current_user
+
+@router.patch("/me", response_model=UserOut)
+async def update_me(
+    user_update: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Update current user's profile info"""
+    if user_update.blood_group is not None:
+        valid_groups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"]
+        if user_update.blood_group not in valid_groups:
+            raise HTTPException(status_code=400, detail="Invalid blood group")
+        current_user.blood_group = user_update.blood_group
+    
+    if user_update.phone is not None:
+        current_user.phone = user_update.phone
+        
+    db.commit()
+    db.refresh(current_user)
     return current_user
 
 @router.get("/users", response_model=list[UserOut])

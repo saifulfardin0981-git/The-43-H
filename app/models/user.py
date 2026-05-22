@@ -11,6 +11,7 @@ class User(Base):
     student_id = Column(String, unique=True, index=True)
     phone = Column(String)
     role = Column(Integer, default=1) # 1: DIU Student, 2: 43-H Student, 3: CR, 4: Absolute Admin
+    blood_group = Column(String, nullable=True)
 
     # Establish relationship with ClassUpdate
     class_updates = relationship("ClassUpdate", back_populates="author")
