@@ -90,6 +90,11 @@ async def update_user_role(
 @router.get("/login")
 async def login(request: Request):
     redirect_uri = request.url_for('auth_callback')
+    
+    # Robust protocol detection for production (behind Nginx/Reverse Proxy)
+    if request.headers.get("x-forwarded-proto") == "https" or str(request.base_url).startswith("https"):
+        redirect_uri = str(redirect_uri).replace("http://", "https://")
+        
     return await oauth.google.authorize_redirect(request, str(redirect_uri))
 
 @router.get("/callback", name="auth_callback")

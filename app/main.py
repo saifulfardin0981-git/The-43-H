@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from app.core.config import settings
 from app.api.routers import auth, class_updates, frontend, notices, academic
 from app.database import engine, Base
@@ -15,8 +16,16 @@ app = FastAPI(
     title=settings.PROJECT_NAME, openapi_url="/api/openapi.json"
 )
 
+# Handle Proxy Headers (Required for OAuth state validation behind HTTPS proxies)
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+
 # Add SessionMiddleware (required for Authlib/OAuth)
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY_SESSION)
+app.add_middleware(
+    SessionMiddleware, 
+    secret_key=settings.SECRET_KEY_SESSION,
+    same_site="lax",
+    https_only=False  # Set to True if you want to force HTTPS-only cookies
+)
 
 # Include routers
 app.include_router(frontend.router, tags=["frontend"])
