@@ -18,6 +18,7 @@ class Routine(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     day_of_week = Column(String, index=True) # e.g., 'Monday'
+    course_code = Column(String, nullable=True) # e.g., 'SWE 331'
     subject = Column(String)
     teacher = Column(String)
     time_slot = Column(String) # e.g., '10:00 AM - 11:30 AM'

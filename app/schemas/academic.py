@@ -4,6 +4,7 @@ from typing import Optional
 
 class RoutineBase(BaseModel):
     day_of_week: str
+    course_code: Optional[str] = None
     subject: str
     teacher: str
     time_slot: str
@@ -15,6 +16,7 @@ class RoutineCreate(RoutineBase):
 
 class RoutineUpdate(BaseModel):
     day_of_week: Optional[str] = None
+    course_code: Optional[str] = None
     subject: Optional[str] = None
     teacher: Optional[str] = None
     time_slot: Optional[str] = None
