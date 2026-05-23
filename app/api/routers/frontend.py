@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
-from app.database import get_db
+from app.core.dependencies import get_db
 from app.models.site_settings import SiteSettings
 
 router = APIRouter()
