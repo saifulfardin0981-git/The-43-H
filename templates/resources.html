@@ -3,10 +3,16 @@
 {% block title %}Academic Resource Hub - 43-H{% endblock %}
 
 {% block content %}
-<div class="mb-8 flex justify-between items-center">
+<div class="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
     <div>
         <h1 class="text-3xl font-bold text-gray-900">Academic Resource Hub</h1>
         <p class="text-gray-500 mt-2">Access lecture slides, books, and other study materials organized by subject.</p>
+    </div>
+    <div class="flex items-center space-x-2">
+        <label for="semesterFilter" class="text-sm font-semibold text-gray-600">Semester:</label>
+        <select id="semesterFilter" onchange="loadResources(this.value)" class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border bg-white">
+            <option value="">Loading...</option>
+        </select>
     </div>
 </div>
 
@@ -16,20 +22,26 @@
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
         Add New Resource
     </h2>
-    <form id="resourceForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-            <label class="block text-sm font-medium text-gray-700">Title</label>
-            <input type="text" name="title" required placeholder="e.g., Chapter 1 Slides" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border">
+    <form id="resourceForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="md:col-span-1">
+            <label class="block text-sm font-medium text-gray-700">Semester</label>
+            <select name="semester_id" id="formSemesterSelect" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border bg-white">
+                <!-- Options populated via JS -->
+            </select>
         </div>
-        <div>
+        <div class="md:col-span-1">
             <label class="block text-sm font-medium text-gray-700">Subject</label>
             <input type="text" name="subject" required placeholder="e.g., Software Engineering" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border">
         </div>
-        <div>
+        <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700">Title</label>
+            <input type="text" name="title" required placeholder="e.g., Chapter 1 Slides" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border">
+        </div>
+        <div class="md:col-span-4">
             <label class="block text-sm font-medium text-gray-700">Link (URL)</label>
             <input type="url" name="link" required placeholder="https://drive.google.com/..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border">
         </div>
-        <div class="md:col-span-3 flex justify-end mt-2">
+        <div class="md:col-span-4 flex justify-end mt-2">
             <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors font-medium">
                 Upload Resource
             </button>
@@ -51,8 +63,15 @@
 
 <script>
     let currentUserRole = 1;
+    let semestersList = [];
 
-    async function checkRoleAndLoad() {
+    async function initializePage() {
+        await checkRole();
+        await loadSemesters();
+        // The default semester resources will be loaded inside loadSemesters
+    }
+
+    async function checkRole() {
         const token = localStorage.getItem('token');
         try {
             const res = await fetch('/api/auth/me', {
@@ -65,24 +84,86 @@
                     document.getElementById('addResourceSection').classList.remove('hidden');
                 }
             }
-            loadResources();
         } catch (error) {
             console.error('Error checking role:', error);
-            loadResources(); // Attempt to load anyway
         }
     }
 
-    async function loadResources() {
+    async function loadSemesters() {
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch('/api/resources/', {
+            const res = await fetch('/api/semesters/', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            semestersList = await res.json();
+            
+            const filterSelect = document.getElementById('semesterFilter');
+            const formSelect = document.getElementById('formSemesterSelect');
+            
+            let optionsHtml = '';
+            let currentSemesterCode = '';
+            let currentSemesterId = '';
+
+            semestersList.forEach(sem => {
+                optionsHtml += `<option value="${sem.code}" ${sem.is_current ? 'selected' : ''}>${sem.name}</option>`;
+                if (sem.is_current) {
+                    currentSemesterCode = sem.code;
+                    currentSemesterId = sem.id;
+                }
+            });
+
+            // If no current semester is marked, default to the first one
+            if (!currentSemesterCode && semestersList.length > 0) {
+                currentSemesterCode = semestersList[0].code;
+                currentSemesterId = semestersList[0].id;
+                optionsHtml = optionsHtml.replace(`value="${currentSemesterCode}"`, `value="${currentSemesterCode}" selected`);
+            }
+
+            filterSelect.innerHTML = optionsHtml;
+            
+            if (formSelect) {
+                let formOptionsHtml = semestersList.map(sem => `<option value="${sem.id}" ${sem.id === currentSemesterId ? 'selected' : ''}>${sem.name}</option>`).join('');
+                formSelect.innerHTML = formOptionsHtml;
+            }
+
+            // Load resources for the initially selected semester
+            if (currentSemesterCode) {
+                loadResources(currentSemesterCode);
+            } else {
+                document.getElementById('resourcesContainer').innerHTML = '<div class="bg-white p-10 rounded-lg shadow-sm border border-dashed border-gray-300 text-center text-gray-500 italic">No semesters configured.</div>';
+            }
+
+        } catch (error) {
+            console.error('Error loading semesters:', error);
+        }
+    }
+
+    async function loadResources(semesterCode) {
+        if (!semesterCode) return;
+        
+        const token = localStorage.getItem('token');
+        const url = `/api/resources/?semester_code=${semesterCode}`;
+        
+        // Show loading state
+        document.getElementById('resourcesContainer').innerHTML = `
+            <div class="animate-pulse space-y-4">
+                <div class="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="h-32 bg-gray-200 rounded-lg"></div>
+                    <div class="h-32 bg-gray-200 rounded-lg"></div>
+                    <div class="h-32 bg-gray-200 rounded-lg"></div>
+                </div>
+            </div>`;
+
+        try {
+            const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const resources = await response.json();
             const container = document.getElementById('resourcesContainer');
             
             if (resources.length === 0) {
-                container.innerHTML = '<div class="bg-white p-10 rounded-lg shadow-sm border border-dashed border-gray-300 text-center text-gray-500 italic">No resources have been uploaded yet.</div>';
+                container.innerHTML = '<div class="bg-white p-10 rounded-lg shadow-sm border border-dashed border-gray-300 text-center text-gray-500 italic">No resources available for this semester yet.</div>';
                 return;
             }
 
@@ -112,7 +193,7 @@
                                         <div class="flex justify-between items-start">
                                             <h3 class="font-bold text-gray-900 mb-1 line-clamp-2" title="${item.title}">${item.title}</h3>
                                             ${currentUserRole >= 3 ? `
-                                                <button onclick="deleteResource(${item.id})" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0" title="Delete Resource">
+                                                <button onclick="deleteResource(${item.id})" class="text-red-400 hover:text-red-600 opacity-0 md:opacity-0 group-hover:opacity-100 opacity-100 transition-opacity ml-2 flex-shrink-0" title="Delete Resource">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                                 </button>
                                             ` : ''}
@@ -141,6 +222,9 @@
         e.preventDefault();
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData.entries());
+        // Convert semester_id to integer
+        if(data.semester_id) data.semester_id = parseInt(data.semester_id);
+        
         const token = localStorage.getItem('token');
 
         try {
@@ -154,8 +238,14 @@
             });
 
             if (response.ok) {
+                // Keep the current semester selection but clear the rest
+                const currentSemId = document.getElementById('formSemesterSelect').value;
                 e.target.reset();
-                loadResources();
+                document.getElementById('formSemesterSelect').value = currentSemId;
+                
+                // Reload the currently viewed semester to show the new resource
+                const activeFilterSem = document.getElementById('semesterFilter').value;
+                loadResources(activeFilterSem);
             } else {
                 const err = await response.json();
                 alert('Failed to add resource: ' + (err.detail || 'Unknown error'));
@@ -174,7 +264,8 @@
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
-                loadResources();
+                const activeFilterSem = document.getElementById('semesterFilter').value;
+                loadResources(activeFilterSem);
             } else {
                 alert('Failed to delete resource.');
             }
@@ -184,6 +275,6 @@
     }
 
     // Initialize
-    checkRoleAndLoad();
+    initializePage();
 </script>
 {% endblock %}

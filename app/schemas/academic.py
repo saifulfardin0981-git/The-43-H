@@ -46,10 +46,25 @@ class AssignmentResponse(AssignmentBase):
     class Config:
         from_attributes = True
 
+class SemesterBase(BaseModel):
+    code: str
+    name: str
+    is_current: bool = False
+
+class SemesterCreate(SemesterBase):
+    pass
+
+class SemesterResponse(SemesterBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
 class ResourceBase(BaseModel):
     title: str
     subject: str
     link: str
+    semester_id: int
 
 class ResourceCreate(ResourceBase):
     pass

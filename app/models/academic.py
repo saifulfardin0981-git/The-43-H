@@ -1,6 +1,17 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from app.database import Base
+
+class Semester(Base):
+    __tablename__ = "semesters"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String, unique=True, index=True) # e.g., '262'
+    name = Column(String) # e.g., 'Summer 2026'
+    is_current = Column(Boolean, default=False)
+    
+    resources = relationship("Resource", back_populates="semester")
 
 class Routine(Base):
     __tablename__ = "routines"
@@ -29,4 +40,7 @@ class Resource(Base):
     subject = Column(String, index=True)
     link = Column(String)
     author_name = Column(String)
+    semester_id = Column(Integer, ForeignKey("semesters.id"), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    semester = relationship("Semester", back_populates="resources")
