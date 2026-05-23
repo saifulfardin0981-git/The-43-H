@@ -79,7 +79,8 @@
 
         <!-- Footer -->
         <footer class="bg-white border-t p-6 text-center text-gray-500 text-sm">
-            <div class="mb-4">
+            <!-- Ad Container -->
+            <div id="ad-container" class="mb-4 hidden">
                 <div id="ad-placeholder" class="bg-gray-50 border border-dashed border-gray-300 p-4 inline-block rounded max-w-lg w-full">
                     <p class="text-gray-400 italic">Class Community Space</p>
                     {% block ad_script %}{% endblock %}
@@ -92,6 +93,7 @@
     <script>
         const token = localStorage.getItem('token');
         const currentPath = window.location.pathname;
+        const globalAdsEnabled = {{ global_ads_enabled | lower }};
 
         async function initBase() {
             if (token) {
@@ -115,6 +117,11 @@
                     if (res.ok) {
                         const user = await res.json();
                         document.getElementById('userDisplay').textContent = `${user.name} (${user.student_id})`;
+                        
+                        // Handle Ad Display Logic
+                        if (globalAdsEnabled && user.ads_enabled !== false) {
+                            document.getElementById('ad-container').classList.remove('hidden');
+                        }
                         
                         // Handle Access Control for Role 1
                         if (user.role === 1) {

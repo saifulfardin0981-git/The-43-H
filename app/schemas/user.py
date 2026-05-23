@@ -18,6 +18,7 @@ class UserUpdate(BaseModel):
 
 class UserOut(UserBase):
     id: int
+    ads_enabled: bool
 
     class Config:
         from_attributes = True

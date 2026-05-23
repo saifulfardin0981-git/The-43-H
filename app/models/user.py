@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -12,6 +12,7 @@ class User(Base):
     phone = Column(String)
     role = Column(Integer, default=1) # 1: DIU Student, 2: 43-H Student, 3: CR, 4: Absolute Admin
     blood_group = Column(String, nullable=True)
+    ads_enabled = Column(Boolean, default=True)
 
     # Establish relationship with ClassUpdate
     class_updates = relationship("ClassUpdate", back_populates="author")
