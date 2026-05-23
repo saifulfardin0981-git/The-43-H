@@ -13,6 +13,17 @@ class Semester(Base):
     
     courses = relationship("Course", back_populates="semester")
     resources = relationship("Resource", back_populates="semester")
+    group_links = relationship("GroupLink", back_populates="semester")
+
+class GroupLink(Base):
+    __tablename__ = "group_links"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
+    link = Column(String)
+    semester_id = Column(Integer, ForeignKey("semesters.id"))
+
+    semester = relationship("Semester", back_populates="group_links")
 
 class Course(Base):
     __tablename__ = "courses"

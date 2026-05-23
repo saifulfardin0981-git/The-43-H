@@ -100,3 +100,17 @@ class ResourceResponse(ResourceBase):
 
     class Config:
         from_attributes = True
+
+class GroupLinkBase(BaseModel):
+    title: str
+    link: str
+    semester_id: int
+
+class GroupLinkCreate(GroupLinkBase):
+    pass
+
+class GroupLinkResponse(GroupLinkBase):
+    id: int
+
+    class Config:
+        from_attributes = True

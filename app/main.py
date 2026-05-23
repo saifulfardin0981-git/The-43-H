@@ -38,3 +38,4 @@ app.include_router(resources.router, prefix="/api/resources", tags=["resources"]
 app.include_router(semesters.router, prefix="/api/semesters", tags=["semesters"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(courses.router, prefix="/api/courses", tags=["courses"])
+app.include_router(groups.router, prefix="/api/groups", tags=["groups"])
