@@ -5,37 +5,37 @@
 {% block content %}
 <div class="max-w-2xl mx-auto">
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Account Settings</h1>
-        <p class="text-gray-500 mt-2">Manage your public profile and contact information.</p>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Account Settings</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-2">Manage your public profile and contact information.</p>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors duration-300">
         <form id="profileForm" class="p-6 md:p-8 space-y-6">
             <!-- Name -->
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Display Name</label>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Display Name</label>
                 <div class="relative">
                     <input type="text" id="name" name="name" required
-                        class="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                        class="block w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                         placeholder="Your full name">
-                    <p class="mt-1 text-xs text-gray-400 italic">This is how your name appears on class updates and directory.</p>
+                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500 italic">This is how your name appears on class updates and directory.</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Phone / WhatsApp -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">WhatsApp Number</label>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">WhatsApp Number</label>
                     <input type="tel" id="phone" name="phone"
-                        class="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                        class="block w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
                         placeholder="e.g. 01712345678">
                 </div>
 
                 <!-- Blood Group -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Blood Group</label>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Blood Group</label>
                     <select id="bloodGroup" name="blood_group"
-                        class="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none appearance-none bg-white">
+                        class="block w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none appearance-none bg-white dark:bg-gray-700">
                         <option value="Unknown">Select Blood Group</option>
                         <option value="A+">A+</option>
                         <option value="A-">A-</option>
@@ -51,20 +51,20 @@
             </div>
 
             <!-- Read-only info -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-100 dark:border-gray-700">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Student ID</label>
-                    <div id="display-sid" class="text-gray-600 font-medium">Loading...</div>
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Student ID</label>
+                    <div id="display-sid" class="text-gray-600 dark:text-gray-400 font-medium">Loading...</div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">DIU Email</label>
-                    <div id="display-email" class="text-gray-600 font-medium italic">Loading...</div>
+                    <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">DIU Email</label>
+                    <div id="display-email" class="text-gray-600 dark:text-gray-400 font-medium italic">Loading...</div>
                 </div>
             </div>
 
             <div class="pt-6">
                 <button type="submit" id="saveBtn"
-                    class="w-full md:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all disabled:opacity-50">
+                    class="w-full md:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 transition-all disabled:opacity-50">
                     Save Changes
                 </button>
             </div>

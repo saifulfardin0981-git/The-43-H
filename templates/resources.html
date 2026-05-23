@@ -5,32 +5,32 @@
 {% block content %}
 <div class="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
     <div>
-        <h1 class="text-3xl font-bold text-gray-900">Academic Resource Hub</h1>
-        <p class="text-gray-500 mt-2">Explore lecture materials, notes, and links organized by course.</p>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Academic Resource Hub</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-2">Explore lecture materials, notes, and links organized by course.</p>
     </div>
     <div class="flex items-center space-x-2">
-        <label for="semesterFilter" class="text-sm font-semibold text-gray-600">Semester:</label>
-        <select id="semesterFilter" onchange="loadCourses(this.value)" class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border bg-white">
+        <label for="semesterFilter" class="text-sm font-semibold text-gray-600 dark:text-gray-300">Semester:</label>
+        <select id="semesterFilter" onchange="loadCourses(this.value)" class="block w-48 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border bg-white dark:bg-gray-700 dark:text-white">
             <option value="">Loading...</option>
         </select>
     </div>
 </div>
 
 <!-- Add Course Form (Role >= 3) -->
-<div id="addCourseSection" class="hidden mb-10 bg-white p-6 rounded-lg shadow-sm border border-blue-200">
-    <h2 id="courseFormTitle" class="text-xl font-semibold text-blue-800 mb-4 flex items-center">
+<div id="addCourseSection" class="hidden mb-10 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-blue-200 dark:border-blue-900 transition-colors duration-300">
+    <h2 id="courseFormTitle" class="text-xl font-semibold text-blue-800 dark:text-blue-300 mb-4 flex items-center">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
         Add New Course
     </h2>
     <form id="courseForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <input type="hidden" name="course_id" id="edit_course_id">
         <div>
-            <label class="block text-sm font-medium text-gray-700">Course Code</label>
-            <input type="text" name="code" id="course_code" required placeholder="e.g., SWE112" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Code</label>
+            <input type="text" name="code" id="course_code" required placeholder="e.g., SWE112" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border dark:bg-gray-700 dark:text-white">
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">Course Name</label>
-            <input type="text" name="name" id="course_name" required placeholder="e.g., Software Engineering" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Name</label>
+            <input type="text" name="name" id="course_name" required placeholder="e.g., Software Engineering" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border dark:bg-gray-700 dark:text-white">
         </div>
         <div class="flex items-end space-x-2">
             <button type="submit" id="courseSubmitBtn" class="flex-1 bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors font-medium">
@@ -45,9 +45,9 @@
 
 <div id="coursesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <!-- Course Cards will be injected here -->
-    <div class="animate-pulse bg-white p-6 rounded-xl border border-gray-200 h-40"></div>
-    <div class="animate-pulse bg-white p-6 rounded-xl border border-gray-200 h-40"></div>
-    <div class="animate-pulse bg-white p-6 rounded-xl border border-gray-200 h-40"></div>
+    <div class="animate-pulse bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 h-40"></div>
+    <div class="animate-pulse bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 h-40"></div>
+    <div class="animate-pulse bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 h-40"></div>
 </div>
 
 <script>
@@ -105,9 +105,9 @@
         selectedSemesterId = semId;
 
         document.getElementById('coursesContainer').innerHTML = `
-            <div class="animate-pulse bg-white p-6 rounded-xl border border-gray-200 h-40"></div>
-            <div class="animate-pulse bg-white p-6 rounded-xl border border-gray-200 h-40"></div>
-            <div class="animate-pulse bg-white p-6 rounded-xl border border-gray-200 h-40"></div>
+            <div class="animate-pulse bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 h-40"></div>
+            <div class="animate-pulse bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 h-40"></div>
+            <div class="animate-pulse bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 h-40"></div>
         `;
 
         try {
@@ -118,15 +118,15 @@
             const container = document.getElementById('coursesContainer');
 
             if (allCourses.length === 0) {
-                container.innerHTML = '<div class="col-span-full bg-white p-10 rounded-lg shadow-sm border border-dashed border-gray-300 text-center text-gray-500 italic">No courses added for this semester yet.</div>';
+                container.innerHTML = '<div class="col-span-full bg-white dark:bg-gray-800 p-10 rounded-lg shadow-sm border border-dashed border-gray-300 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400 italic">No courses added for this semester yet.</div>';
                 return;
             }
 
             container.innerHTML = allCourses.map(course => `
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between hover:shadow-md transition-all hover:-translate-y-1 group cursor-pointer" onclick="window.location.href='/course/${course.id}'">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 flex flex-col justify-between hover:shadow-md transition-all hover:-translate-y-1 group cursor-pointer" onclick="window.location.href='/course/${course.id}'">
                     <div>
                         <div class="flex justify-between items-start mb-2">
-                            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded uppercase tracking-wider">${course.code}</span>
+                            <span class="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded uppercase tracking-wider">${course.code}</span>
                             ${currentUserRole >= 3 ? `
                                 <div class="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onclick="event.stopPropagation(); editCourse(${course.id})" class="text-blue-500 hover:text-blue-700 p-1">
@@ -138,9 +138,9 @@
                                 </div>
                             ` : ''}
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">${course.name}</h3>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">${course.name}</h3>
                     </div>
-                    <div class="mt-6 flex items-center text-sm font-medium text-gray-400">
+                    <div class="mt-6 flex items-center text-sm font-medium text-gray-400 dark:text-gray-500">
                         <span>View Resources</span>
                         <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                     </div>
