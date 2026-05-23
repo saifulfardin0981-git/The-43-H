@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime
+from datetime import datetime, timezone
 from app.database import Base
 
 class Routine(Base):
@@ -19,3 +20,13 @@ class Assignment(Base):
     subject = Column(String)
     due_date = Column(DateTime)
     description = Column(Text, nullable=True)
+
+class Resource(Base):
+    __tablename__ = "resources"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
+    subject = Column(String, index=True)
+    link = Column(String)
+    author_name = Column(String)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

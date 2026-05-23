@@ -45,3 +45,19 @@ class AssignmentResponse(AssignmentBase):
 
     class Config:
         from_attributes = True
+
+class ResourceBase(BaseModel):
+    title: str
+    subject: str
+    link: str
+
+class ResourceCreate(ResourceBase):
+    pass
+
+class ResourceResponse(ResourceBase):
+    id: int
+    author_name: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
