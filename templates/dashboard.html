@@ -3,7 +3,12 @@
 {% block title %}Dashboard - 43-H{% endblock %}
 
 {% block nav %}
-<button onclick="logout()" class="hover:underline">Logout</button>
+<div class="flex items-center space-x-4">
+    <button id="viewModeBtn" onclick="toggleViewMode()" class="hidden px-3 py-1 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-400 transition-colors border border-blue-400">
+        Management Tools
+    </button>
+    <button onclick="logout()" class="hover:underline">Logout</button>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -205,6 +210,14 @@
 </div>
 
 <script>
+    let currentUser = null;
+    let currentViewMode = 'student'; // 'student' or 'management'
+
+    async function toggleViewMode() {
+        currentViewMode = currentViewMode === 'student' ? 'management' : 'student';
+        await renderDashboard();
+    }
+
     async function loadUserAndUpdates() {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -225,49 +238,84 @@
                 return; 
             }
             
-            const user = await userResponse.json();
-            console.log("User loaded:", user.email, "Role:", user.role);
-            
-            // Set current blood group in dropdown and hide section if already set
-            const profileSection = document.getElementById('profileSection');
-            const editProfileBtn = document.getElementById('editProfileBtn');
-            const bloodGroupSelect = document.getElementById('bloodGroupSelect');
-            if (bloodGroupSelect) {
-                const bg = user.blood_group || 'Unknown';
-                bloodGroupSelect.value = bg;
-                if (bg !== 'Unknown') {
-                    profileSection.classList.add('hidden');
-                    editProfileBtn.classList.remove('hidden');
-                } else {
-                    profileSection.classList.remove('hidden');
-                    editProfileBtn.classList.add('hidden');
-                }
+            currentUser = await userResponse.json();
+            await renderDashboard();
+        } catch (error) {
+            console.error('Error in loadUserAndUpdates:', error);
+        }
+    }
+
+    async function renderDashboard() {
+        if (!currentUser) return;
+        const user = currentUser;
+        const token = localStorage.getItem('token');
+        console.log("Rendering dashboard for:", user.email, "Role:", user.role, "Mode:", currentViewMode);
+        
+        // Handle View Mode Toggle Button
+        const viewModeBtn = document.getElementById('viewModeBtn');
+        if (user.role >= 3) {
+            viewModeBtn.classList.remove('hidden');
+            if (currentViewMode === 'student') {
+                viewModeBtn.textContent = user.role === 4 ? 'Admin Tools' : 'CR Tools';
+                viewModeBtn.classList.replace('bg-blue-600', 'bg-blue-500');
+            } else {
+                viewModeBtn.textContent = 'View as Student';
+                viewModeBtn.classList.replace('bg-blue-500', 'bg-blue-600');
             }
+        } else {
+            viewModeBtn.classList.add('hidden');
+        }
 
-            const badge = document.getElementById('roleBadge');
-            const ROLE_NAMES = {1: 'DIU Student', 2: '43-H Student', 3: 'CR', 4: 'Admin'};
-            badge.textContent = ROLE_NAMES[user.role] || 'User';
-            badge.classList.remove('hidden');
-            badge.classList.add(user.role >= 3 ? 'bg-purple-100' : 'bg-green-100');
-            badge.classList.add(user.role >= 3 ? 'text-purple-800' : 'text-green-800');
-
-            if (user.role >= 3) {
-                document.getElementById('postUpdateSection').classList.remove('hidden');
-                document.getElementById('postNoticeSection').classList.remove('hidden');
-                document.getElementById('addRoutineSection').classList.remove('hidden');
-                document.getElementById('addAssignmentSection').classList.remove('hidden');
+        // Show/Hide Management Sections
+        const isManagement = currentViewMode === 'management';
+        
+        // Profile Section
+        const profileSection = document.getElementById('profileSection');
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        const bloodGroupSelect = document.getElementById('bloodGroupSelect');
+        if (bloodGroupSelect) {
+            const bg = user.blood_group || 'Unknown';
+            bloodGroupSelect.value = bg;
+            if (bg !== 'Unknown') {
+                profileSection.classList.add('hidden');
+                editProfileBtn.classList.remove('hidden');
+            } else {
+                profileSection.classList.remove('hidden');
+                editProfileBtn.classList.add('hidden');
             }
+        }
 
-            if (user.role === 4) {
-                document.getElementById('adminSection').classList.remove('hidden');
-                loadAdminUsers(user.email);
-            }
+        const badge = document.getElementById('roleBadge');
+        const ROLE_NAMES = {1: 'DIU Student', 2: '43-H Student', 3: 'CR', 4: 'Admin'};
+        badge.textContent = ROLE_NAMES[user.role] || 'User';
+        badge.classList.remove('hidden');
+        badge.className = 'px-3 py-1 rounded-full text-xs font-semibold ' + (user.role >= 3 ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800');
 
-            // Load Notices, Routine, and Assignments
-            loadNotices(user.role >= 3);
-            loadRoutine(user.role >= 3);
-            loadAssignments(user.role >= 3);
+        if (user.role >= 3 && isManagement) {
+            document.getElementById('postUpdateSection').classList.remove('hidden');
+            document.getElementById('postNoticeSection').classList.remove('hidden');
+            document.getElementById('addRoutineSection').classList.remove('hidden');
+            document.getElementById('addAssignmentSection').classList.remove('hidden');
+        } else {
+            document.getElementById('postUpdateSection').classList.add('hidden');
+            document.getElementById('postNoticeSection').classList.add('hidden');
+            document.getElementById('addRoutineSection').classList.add('hidden');
+            document.getElementById('addAssignmentSection').classList.add('hidden');
+        }
 
+        if (user.role === 4 && isManagement) {
+            document.getElementById('adminSection').classList.remove('hidden');
+            loadAdminUsers(user.email);
+        } else {
+            document.getElementById('adminSection').classList.add('hidden');
+        }
+
+        // Load Notices, Routine, and Assignments
+        loadNotices(user.role >= 3 && isManagement);
+        loadRoutine(user.role >= 3 && isManagement);
+        loadAssignments(user.role >= 3 && isManagement);
+
+        try {
             console.log("Fetching class updates...");
             const response = await fetch('/api/class-updates/', {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -304,7 +352,7 @@
                 </div>
             `).join('');
         } catch (error) {
-            console.error('Error loading dashboard:', error);
+            console.error('Error loading updates:', error);
             document.getElementById('updatesList').innerHTML = `<p class="text-red-500 text-center">Error loading updates. Please check console.</p>`;
         }
     }
