@@ -35,6 +35,9 @@ async def update_me(
     current_user: User = Depends(get_current_user)
 ):
     """Update current user's profile info"""
+    if user_update.name is not None:
+        current_user.name = user_update.name
+
     if user_update.blood_group is not None:
         valid_groups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"]
         if user_update.blood_group not in valid_groups:

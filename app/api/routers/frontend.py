@@ -20,3 +20,11 @@ async def dashboard_page(request: Request):
 @router.get("/directory", response_class=HTMLResponse)
 async def directory_page(request: Request):
     return templates.TemplateResponse(request=request, name="directory.html", context={"request": request})
+
+@router.get("/profile", response_class=HTMLResponse)
+async def profile_page(request: Request):
+    return templates.TemplateResponse(request=request, name="profile.html", context={"request": request})
+
+@router.get("/resources", response_class=HTMLResponse)
+async def resources_page(request: Request):
+    return templates.TemplateResponse(request=request, name="resources.html", context={"request": request})

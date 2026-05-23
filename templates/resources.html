@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Course Resources - 43-H{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Course Resources</h1>
+    <p class="text-gray-500 mt-2">Access topics covered and resource links for all courses.</p>
+</div>
+
+<div id="resourcesList" class="space-y-6">
+    <!-- Resources will be injected here -->
+    <div class="animate-pulse flex space-x-4">
+        <div class="flex-1 space-y-4 py-1">
+            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div class="space-y-2">
+                <div class="h-4 bg-gray-200 rounded"></div>
+                <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadResources() {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch('/api/class-updates/', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const updates = await response.json();
+            const listDiv = document.getElementById('resourcesList');
+            
+            if (updates.length === 0) {
+                listDiv.innerHTML = '<p class="text-gray-500 text-center italic py-10 bg-white rounded-lg border border-dashed border-gray-300">No course resources available yet.</p>';
+                return;
+            }
+
+            listDiv.innerHTML = updates.map(update => `
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 bg-blue-50 rounded-lg">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-800">${update.course_name}</h2>
+                        </div>
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-1 rounded">${new Date(update.date).toLocaleDateString()}</span>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-tighter mb-2">Topics Covered</h3>
+                        <div class="text-gray-700 bg-gray-50 p-4 rounded-lg border border-gray-100 whitespace-pre-wrap leading-relaxed">${update.topics_covered}</div>
+                    </div>
+
+                    ${update.resources_link ? `
+                        <div class="flex justify-end">
+                            <a href="${update.resources_link}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                Access Materials
+                            </a>
+                        </div>
+                    ` : `
+                        <div class="text-right text-xs text-gray-400 italic">No resource link provided</div>
+                    `}
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading resources:', error);
+            document.getElementById('resourcesList').innerHTML = `<p class="text-red-500 text-center py-10 bg-red-50 rounded-lg border border-red-100">Error loading resources. Please try again later.</p>`;
+        }
+    }
+
+    loadResources();
+</script>
+{% endblock %}

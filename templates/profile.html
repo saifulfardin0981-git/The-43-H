@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - 43-H{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Account Settings</h1>
+        <p class="text-gray-500 mt-2">Manage your public profile and contact information.</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <form id="profileForm" class="p-6 md:p-8 space-y-6">
+            <!-- Name -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Display Name</label>
+                <div class="relative">
+                    <input type="text" id="name" name="name" required
+                        class="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                        placeholder="Your full name">
+                    <p class="mt-1 text-xs text-gray-400 italic">This is how your name appears on class updates and directory.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Phone / WhatsApp -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">WhatsApp Number</label>
+                    <input type="tel" id="phone" name="phone"
+                        class="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none"
+                        placeholder="e.g. 01712345678">
+                </div>
+
+                <!-- Blood Group -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Blood Group</label>
+                    <select id="bloodGroup" name="blood_group"
+                        class="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none appearance-none bg-white">
+                        <option value="Unknown">Select Blood Group</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="Unknown">Unknown</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Read-only info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Student ID</label>
+                    <div id="display-sid" class="text-gray-600 font-medium">Loading...</div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">DIU Email</label>
+                    <div id="display-email" class="text-gray-600 font-medium italic">Loading...</div>
+                </div>
+            </div>
+
+            <div class="pt-6">
+                <button type="submit" id="saveBtn"
+                    class="w-full md:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all disabled:opacity-50">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    async function loadProfile() {
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch('/api/auth/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const user = await res.json();
+            
+            document.getElementById('name').value = user.name || '';
+            document.getElementById('phone').value = user.phone || '';
+            document.getElementById('bloodGroup').value = user.blood_group || 'Unknown';
+            document.getElementById('display-sid').textContent = user.student_id;
+            document.getElementById('display-email').textContent = user.email;
+        } catch (e) {
+            console.error("Failed to load profile", e);
+        }
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+
+        const token = localStorage.getItem('token');
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const res = await fetch('/api/auth/me', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                alert('Profile updated successfully!');
+                window.location.reload();
+            } else {
+                const err = await res.json();
+                alert('Error: ' + (err.detail || 'Failed to update profile'));
+            }
+        } catch (e) {
+            console.error("Update failed", e);
+            alert('An error occurred. Please try again.');
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Changes';
+        }
+    });
+
+    loadProfile();
+</script>
+{% endblock %}

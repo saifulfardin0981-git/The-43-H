@@ -12,6 +12,7 @@ class UserCreate(UserBase):
     pass
 
 class UserUpdate(BaseModel):
+    name: str | None = None
     blood_group: str | None = None
     phone: str | None = None
 
