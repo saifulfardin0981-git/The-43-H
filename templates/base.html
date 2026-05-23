@@ -12,14 +12,21 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row">
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row overflow-x-hidden">
+    <!-- Sidebar Backdrop (Mobile only) -->
+    <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden transition-opacity duration-300"></div>
+
     <!-- Sidebar -->
-    <aside id="sidebar" class="hidden md:flex md:w-64 bg-gray-900 text-white flex-col sticky top-0 h-screen transition-all duration-300">
-        <div class="p-6">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white flex flex-col z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl">
+        <div class="p-6 border-b border-gray-800 flex items-center justify-between">
             <a href="/dashboard" class="text-2xl font-bold tracking-wider text-blue-400">43-H</a>
+            <!-- Close button for mobile -->
+            <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg hover:bg-gray-800">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l18 18"></path></svg>
+            </button>
         </div>
         
-        <nav class="flex-grow px-4 space-y-2">
+        <nav class="flex-grow px-4 py-6 space-y-2 overflow-y-auto">
             <a href="/dashboard" id="menu-dashboard" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-800 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                 <span>Dashboard</span>
@@ -46,44 +53,30 @@
         </div>
     </aside>
 
-    <!-- Mobile Header -->
-    <header class="md:hidden bg-gray-900 text-white p-4 flex justify-between items-center sticky top-0 z-50">
-        <a href="/dashboard" class="text-xl font-bold text-blue-400">43-H</a>
-        <button onclick="toggleMobileMenu()" class="p-2 rounded-lg hover:bg-gray-800">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-        </button>
-    </header>
-
-    <div id="mobileMenu" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-40 hidden flex-col p-6 space-y-4 text-white">
-        <div class="flex justify-end">
-            <button onclick="toggleMobileMenu()" class="p-2">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l18 18"></path></svg>
-            </button>
-        </div>
-        <a href="/dashboard" id="mobile-menu-dashboard" class="text-2xl font-semibold border-b border-gray-800 pb-2">Dashboard</a>
-        <a href="/resources" class="text-2xl font-semibold border-b border-gray-800 pb-2">Course Resources</a>
-        <a href="/directory" id="mobile-menu-directory" class="text-2xl font-semibold border-b border-gray-800 pb-2">Student Directory</a>
-        <a href="/profile" class="text-2xl font-semibold border-b border-gray-800 pb-2">My Profile</a>
-        <button onclick="logout()" class="text-2xl font-semibold text-red-400 text-left pt-4">Logout</button>
-    </div>
-
-    <!-- Main Content -->
-    <div class="flex-grow flex flex-col min-w-0">
-        <header class="hidden md:flex bg-white border-b h-16 items-center px-8 justify-between sticky top-0 z-10">
+    <!-- Main Content Area -->
+    <div class="flex-grow flex flex-col min-w-0 md:ml-64 bg-gray-100 min-h-screen">
+        <!-- Top Navbar (Desktop & Mobile) -->
+        <header class="bg-white border-b h-16 flex items-center px-4 md:px-8 justify-between sticky top-0 z-30">
             <div class="flex items-center space-x-4">
+                <!-- Hamburger Menu Button (Mobile Only) -->
+                <button id="mobileMenuBtn" onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
                 {% block nav %}{% endblock %}
             </div>
-            <div id="userDisplay" class="text-sm font-medium text-gray-600"></div>
+            <div id="userDisplay" class="text-sm font-medium text-gray-600 truncate max-w-[150px] sm:max-w-none"></div>
         </header>
 
-        <main class="flex-grow p-4 md:p-8 overflow-y-auto">
+        <!-- Page Content -->
+        <main class="flex-grow p-4 md:p-8">
             {% block content %}{% endblock %}
         </main>
 
+        <!-- Footer -->
         <footer class="bg-white border-t p-6 text-center text-gray-500 text-sm">
             <div class="mb-4">
                 <div id="ad-placeholder" class="bg-gray-50 border border-dashed border-gray-300 p-4 inline-block rounded max-w-lg w-full">
-                    <p class="text-gray-400">Class Community Space</p>
+                    <p class="text-gray-400 italic">Class Community Space</p>
                     {% block ad_script %}{% endblock %}
                 </div>
             </div>
@@ -97,8 +90,7 @@
 
         async function initBase() {
             if (token) {
-                document.getElementById('sidebar')?.classList.remove('hidden');
-                document.getElementById('sidebar')?.classList.add('flex');
+                // Initial check for mobile sidebar state is handled by CSS classes
                 
                 try {
                     const res = await fetch('/api/auth/me', {
@@ -110,12 +102,12 @@
                         
                         // Handle Access Control for Role 1
                         if (user.role === 1) {
-                            const restricted = ['menu-dashboard', 'menu-directory', 'mobile-menu-dashboard', 'mobile-menu-directory'];
+                            const restricted = ['menu-dashboard', 'menu-directory'];
                             restricted.forEach(id => {
                                 const el = document.getElementById(id);
                                 if (el) {
                                     el.classList.add('opacity-30', 'pointer-events-none');
-                                    el.setAttribute('onclick', 'return false;');
+                                    el.setAttribute('href', '#');
                                 }
                             });
                             // If they are on a restricted page, move them to resources
@@ -140,16 +132,32 @@
                 '/directory': 'menu-directory',
                 '/profile': 'menu-profile'
             };
-            const activeId = menuMap[currentPath];
+            
+            // Default to dashboard if we're on the dashboard or root
+            let activeId = menuMap[currentPath];
+            if (currentPath === '/' || currentPath === '/login') activeId = null; 
+            else if (!activeId && currentPath === '/dashboard') activeId = 'menu-dashboard';
+            
             if (activeId) {
                 document.getElementById(activeId)?.classList.add('sidebar-link-active');
+            } else if (currentPath.includes('dashboard')) {
+                 document.getElementById('menu-dashboard')?.classList.add('sidebar-link-active');
             }
         }
 
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            menu.classList.toggle('hidden');
-            menu.classList.toggle('flex');
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            
+            const isOpen = !sidebar.classList.contains('-translate-x-full');
+            
+            if (isOpen) {
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+            }
         }
 
         function logout() {
