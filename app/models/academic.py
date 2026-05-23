@@ -22,6 +22,7 @@ class Routine(Base):
     teacher = Column(String)
     time_slot = Column(String) # e.g., '10:00 AM - 11:30 AM'
     room_number = Column(String)
+    group = Column(String, nullable=True, default='Combined') # e.g., 'Combined', 'H1', 'H2'
 
 class Assignment(Base):
     __tablename__ = "assignments"

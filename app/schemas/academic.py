@@ -8,6 +8,7 @@ class RoutineBase(BaseModel):
     teacher: str
     time_slot: str
     room_number: str
+    group: str = 'Combined'
 
 class RoutineCreate(RoutineBase):
     pass
@@ -18,6 +19,7 @@ class RoutineUpdate(BaseModel):
     teacher: Optional[str] = None
     time_slot: Optional[str] = None
     room_number: Optional[str] = None
+    group: Optional[str] = None
 
 class RoutineResponse(RoutineBase):
     id: int
