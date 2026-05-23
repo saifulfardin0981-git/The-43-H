@@ -13,12 +13,13 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">WhatsApp</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blood Group</th>
                 </tr>
             </thead>
             <tbody id="userList" class="bg-white divide-y divide-gray-200">
                 <tr>
-                    <td colspan="4" class="px-6 py-4 text-center text-gray-500 animate-pulse">Loading directory...</td>
+                    <td colspan="5" class="px-6 py-4 text-center text-gray-500 animate-pulse">Loading directory...</td>
                 </tr>
             </tbody>
         </table>
@@ -68,7 +69,7 @@
             const listBody = document.getElementById('userList');
             
             if (users.length === 0) {
-                listBody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500 italic">No students found in 43-H directory.</td></tr>';
+                listBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500 italic">No students found in 43-H directory.</td></tr>';
                 return;
             }
 
@@ -77,6 +78,17 @@
                 let displayName = user.name || 'N/A';
                 if (user.role === 3) {
                     displayName += ` <span class="text-gray-400 text-sm ml-2 font-semibold">(CR)</span>`;
+                }
+
+                // WhatsApp Link
+                let whatsappHtml = '<span class="text-gray-400 italic text-xs">Not provided</span>';
+                if (user.phone) {
+                    const cleanPhone = user.phone.replace(/\D/g, '');
+                    whatsappHtml = `
+                        <a href="https://wa.me/${cleanPhone.startsWith('88') ? cleanPhone : '88' + cleanPhone}" target="_blank" class="inline-flex items-center text-green-600 hover:text-green-700 font-medium">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.483 8.413-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.308 1.654zm6.233-3.723c1.533.914 3.011 1.385 4.546 1.386 5.45 0 9.889-4.438 9.892-9.889.002-2.646-1.03-5.132-2.903-7.005-1.871-1.871-4.358-2.903-7.004-2.903-5.451 0-9.89 4.439-9.892 9.89-.001 1.774.475 3.51 1.378 5.021l-.97 3.543 3.633-.952zm11.381-6.732c-.31-.155-1.834-.906-2.112-1.006-.279-.101-.482-.151-.684.151-.202.302-.782.906-.959 1.107-.177.202-.354.227-.664.072-.31-.155-1.31-.483-2.494-1.539-.922-.822-1.543-1.838-1.724-2.14-.181-.303-.02-.467.135-.62.14-.138.31-.362.466-.544.155-.181.206-.31.31-.517.103-.207.052-.387-.026-.54-.077-.154-.684-1.648-.937-2.254-.247-.591-.497-.512-.684-.522-.177-.01-.38-.012-.582-.012-.202 0-.531.076-.809.354-.279.278-1.062 1.039-1.062 2.535s1.087 2.946 1.239 3.148c.152.201 2.138 3.264 5.18 4.562.723.309 1.288.494 1.727.633.726.231 1.387.198 1.91.133.583-.073 1.834-.749 2.088-1.475.253-.725.253-1.345.177-1.475-.076-.13-.278-.206-.588-.362z"/></svg>
+                            ${user.phone}
+                        </a>`;
                 }
 
                 // Blood Group Badge
@@ -89,6 +101,9 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${displayName}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.email}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            ${whatsappHtml}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
                             <span class="px-2.5 py-0.5 rounded-full text-xs font-medium ${bgClass}">
                                 ${bg}
                             </span>
@@ -98,7 +113,7 @@
             }).join('');
         } catch (error) {
             console.error('Error loading directory:', error);
-            document.getElementById('userList').innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Error loading directory. Check console.</td></tr>`;
+            document.getElementById('userList').innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Error loading directory. Check console.</td></tr>`;
         }
     }
 
