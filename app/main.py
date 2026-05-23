@@ -2,11 +2,11 @@ from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from app.core.config import settings
-from app.api.routers import auth, class_updates, frontend, notices, academic, resources, semesters, admin, courses
+from app.api.routers import auth, class_updates, frontend, notices, academic, resources, semesters, admin, courses, groups
 from app.database import engine, Base
 from app.models import User, ClassUpdate
 from app.models.notice import Notice
-from app.models.academic import Routine, Assignment, Resource, Semester, Course
+from app.models.academic import Routine, Assignment, Resource, Semester, Course, GroupLink
 from app.models.site_settings import SiteSettings
  # Ensure Notice model is imported for metadata
 
