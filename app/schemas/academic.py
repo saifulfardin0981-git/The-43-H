@@ -72,6 +72,11 @@ class CourseBase(BaseModel):
 class CourseCreate(CourseBase):
     pass
 
+class CourseUpdate(BaseModel):
+    code: Optional[str] = None
+    name: Optional[str] = None
+    semester_id: Optional[int] = None
+
 class CourseResponse(CourseBase):
     id: int
 
