@@ -12,6 +12,13 @@ class RoutineBase(BaseModel):
 class RoutineCreate(RoutineBase):
     pass
 
+class RoutineUpdate(BaseModel):
+    day_of_week: Optional[str] = None
+    subject: Optional[str] = None
+    teacher: Optional[str] = None
+    time_slot: Optional[str] = None
+    room_number: Optional[str] = None
+
 class RoutineResponse(RoutineBase):
     id: int
 
@@ -26,6 +33,12 @@ class AssignmentBase(BaseModel):
 
 class AssignmentCreate(AssignmentBase):
     pass
+
+class AssignmentUpdate(BaseModel):
+    title: Optional[str] = None
+    subject: Optional[str] = None
+    due_date: Optional[datetime] = None
+    description: Optional[str] = None
 
 class AssignmentResponse(AssignmentBase):
     id: int

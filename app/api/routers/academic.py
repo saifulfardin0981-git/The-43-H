@@ -5,8 +5,8 @@ from app.core.dependencies import get_db, get_current_user, get_current_cr
 from app.models.academic import Routine, Assignment
 from app.models.user import User
 from app.schemas.academic import (
-    RoutineCreate, RoutineResponse,
-    AssignmentCreate, AssignmentResponse
+    RoutineCreate, RoutineUpdate, RoutineResponse,
+    AssignmentCreate, AssignmentUpdate, AssignmentResponse
 )
 
 router = APIRouter()
@@ -33,6 +33,26 @@ def create_routine(
     db.commit()
     db.refresh(new_routine)
     return new_routine
+
+@router.patch("/routines/{routine_id}", response_model=RoutineResponse)
+def update_routine(
+    routine_id: int,
+    routine_in: RoutineUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_cr)
+):
+    """Update a routine entry (CR/Admin only)"""
+    routine = db.query(Routine).filter(Routine.id == routine_id).first()
+    if not routine:
+        raise HTTPException(status_code=404, detail="Routine not found")
+    
+    update_data = routine_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(routine, key, value)
+    
+    db.commit()
+    db.refresh(routine)
+    return routine
 
 @router.delete("/routines/{routine_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_routine(
@@ -70,6 +90,27 @@ def create_assignment(
     db.commit()
     db.refresh(new_assignment)
     return new_assignment
+
+@router.patch("/assignments/{assignment_id}", response_model=AssignmentResponse)
+def update_assignment(
+    assignment_id: int,
+    assignment_in: AssignmentUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_cr)
+):
+    """Update an assignment (CR/Admin only)"""
+    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    
+    update_data = assignment_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(assignment, key, value)
+    
+    db.commit()
+    db.refresh(assignment)
+    return assignment
+
 
 @router.delete("/assignments/{assignment_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_assignment(

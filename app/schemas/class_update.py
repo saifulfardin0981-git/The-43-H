@@ -11,6 +11,12 @@ class ClassUpdateBase(BaseModel):
 class ClassUpdateCreate(ClassUpdateBase):
     pass
 
+class ClassUpdateUpdate(BaseModel):
+    date: Optional[date] = None
+    course_name: Optional[str] = None
+    topics_covered: Optional[str] = None
+    resources_link: Optional[str] = None
+
 class ClassUpdateOut(ClassUpdateBase):
     id: int
     posted_by: int
