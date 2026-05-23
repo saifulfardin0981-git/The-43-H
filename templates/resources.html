@@ -6,69 +6,53 @@
 <div class="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
     <div>
         <h1 class="text-3xl font-bold text-gray-900">Academic Resource Hub</h1>
-        <p class="text-gray-500 mt-2">Access lecture slides, books, and other study materials organized by subject.</p>
+        <p class="text-gray-500 mt-2">Explore lecture materials, notes, and links organized by course.</p>
     </div>
     <div class="flex items-center space-x-2">
         <label for="semesterFilter" class="text-sm font-semibold text-gray-600">Semester:</label>
-        <select id="semesterFilter" onchange="loadResources(this.value)" class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border bg-white">
+        <select id="semesterFilter" onchange="loadCourses(this.value)" class="block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border bg-white">
             <option value="">Loading...</option>
         </select>
     </div>
 </div>
 
-<!-- Add Resource Form (Role >= 3) -->
-<div id="addResourceSection" class="hidden mb-10 bg-white p-6 rounded-lg shadow-sm border border-blue-200">
+<!-- Add Course Form (Role >= 3) -->
+<div id="addCourseSection" class="hidden mb-10 bg-white p-6 rounded-lg shadow-sm border border-blue-200">
     <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-        Add New Resource
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+        Add New Course
     </h2>
-    <form id="resourceForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="md:col-span-1">
-            <label class="block text-sm font-medium text-gray-700">Semester</label>
-            <select name="semester_id" id="formSemesterSelect" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border bg-white">
-                <!-- Options populated via JS -->
-            </select>
+    <form id="courseForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Course Code</label>
+            <input type="text" name="code" required placeholder="e.g., SWE112" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border">
         </div>
-        <div class="md:col-span-1">
-            <label class="block text-sm font-medium text-gray-700">Subject</label>
-            <input type="text" name="subject" required placeholder="e.g., Software Engineering" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border">
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Course Name</label>
+            <input type="text" name="name" required placeholder="e.g., Software Engineering" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border">
         </div>
-        <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700">Title</label>
-            <input type="text" name="title" required placeholder="e.g., Chapter 1 Slides" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border">
-        </div>
-        <div class="md:col-span-4">
-            <label class="block text-sm font-medium text-gray-700">Link (URL)</label>
-            <input type="url" name="link" required placeholder="https://drive.google.com/..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border">
-        </div>
-        <div class="md:col-span-4 flex justify-end mt-2">
-            <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors font-medium">
-                Upload Resource
+        <div class="flex items-end">
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                Create Course
             </button>
         </div>
     </form>
 </div>
 
-<div id="resourcesContainer" class="space-y-8">
-    <!-- Resources grouped by subject will be injected here -->
-    <div class="animate-pulse space-y-4">
-        <div class="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="h-32 bg-gray-200 rounded-lg"></div>
-            <div class="h-32 bg-gray-200 rounded-lg"></div>
-            <div class="h-32 bg-gray-200 rounded-lg"></div>
-        </div>
-    </div>
+<div id="coursesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Course Cards will be injected here -->
+    <div class="animate-pulse bg-white p-6 rounded-xl border border-gray-200 h-40"></div>
+    <div class="animate-pulse bg-white p-6 rounded-xl border border-gray-200 h-40"></div>
+    <div class="animate-pulse bg-white p-6 rounded-xl border border-gray-200 h-40"></div>
 </div>
 
 <script>
     let currentUserRole = 1;
-    let semestersList = [];
+    let selectedSemesterId = null;
 
     async function initializePage() {
         await checkRole();
         await loadSemesters();
-        // The default semester resources will be loaded inside loadSemesters
     }
 
     async function checkRole() {
@@ -81,12 +65,10 @@
                 const user = await res.json();
                 currentUserRole = user.role;
                 if (currentUserRole >= 3) {
-                    document.getElementById('addResourceSection').classList.remove('hidden');
+                    document.getElementById('addCourseSection').classList.remove('hidden');
                 }
             }
-        } catch (error) {
-            console.error('Error checking role:', error);
-        }
+        } catch (error) { console.error('Error checking role:', error); }
     }
 
     async function loadSemesters() {
@@ -95,186 +77,100 @@
             const res = await fetch('/api/semesters/', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            semestersList = await res.json();
-            
+            const semesters = await res.json();
             const filterSelect = document.getElementById('semesterFilter');
-            const formSelect = document.getElementById('formSemesterSelect');
             
-            let optionsHtml = '';
-            let currentSemesterCode = '';
-            let currentSemesterId = '';
-
-            semestersList.forEach(sem => {
-                optionsHtml += `<option value="${sem.code}" ${sem.is_current ? 'selected' : ''}>${sem.name}</option>`;
+            let currentCode = '';
+            filterSelect.innerHTML = semesters.map(sem => {
                 if (sem.is_current) {
-                    currentSemesterCode = sem.code;
-                    currentSemesterId = sem.id;
+                    currentCode = sem.code;
+                    selectedSemesterId = sem.id;
                 }
-            });
+                return `<option value="${sem.code}" data-id="${sem.id}" ${sem.is_current ? 'selected' : ''}>${sem.name}</option>`;
+            }).join('');
 
-            // If no current semester is marked, default to the first one
-            if (!currentSemesterCode && semestersList.length > 0) {
-                currentSemesterCode = semestersList[0].code;
-                currentSemesterId = semestersList[0].id;
-                optionsHtml = optionsHtml.replace(`value="${currentSemesterCode}"`, `value="${currentSemesterCode}" selected`);
-            }
-
-            filterSelect.innerHTML = optionsHtml;
-            
-            if (formSelect) {
-                let formOptionsHtml = semestersList.map(sem => `<option value="${sem.id}" ${sem.id === currentSemesterId ? 'selected' : ''}>${sem.name}</option>`).join('');
-                formSelect.innerHTML = formOptionsHtml;
-            }
-
-            // Load resources for the initially selected semester
-            if (currentSemesterCode) {
-                loadResources(currentSemesterCode);
-            } else {
-                document.getElementById('resourcesContainer').innerHTML = '<div class="bg-white p-10 rounded-lg shadow-sm border border-dashed border-gray-300 text-center text-gray-500 italic">No semesters configured.</div>';
-            }
-
-        } catch (error) {
-            console.error('Error loading semesters:', error);
-        }
+            if (currentCode) loadCourses(currentCode);
+        } catch (error) { console.error('Error loading semesters:', error); }
     }
 
-    async function loadResources(semesterCode) {
-        if (!semesterCode) return;
-        
+    async function loadCourses(semesterCode) {
         const token = localStorage.getItem('token');
-        const url = `/api/resources/?semester_code=${semesterCode}`;
-        
-        // Show loading state
-        document.getElementById('resourcesContainer').innerHTML = `
-            <div class="animate-pulse space-y-4">
-                <div class="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div class="h-32 bg-gray-200 rounded-lg"></div>
-                    <div class="h-32 bg-gray-200 rounded-lg"></div>
-                    <div class="h-32 bg-gray-200 rounded-lg"></div>
-                </div>
-            </div>`;
+        const filterSelect = document.getElementById('semesterFilter');
+        const semId = filterSelect.options[filterSelect.selectedIndex].dataset.id;
+        selectedSemesterId = semId;
+
+        document.getElementById('coursesContainer').innerHTML = `
+            <div class="animate-pulse bg-white p-6 rounded-xl border border-gray-200 h-40"></div>
+            <div class="animate-pulse bg-white p-6 rounded-xl border border-gray-200 h-40"></div>
+            <div class="animate-pulse bg-white p-6 rounded-xl border border-gray-200 h-40"></div>
+        `;
 
         try {
-            const response = await fetch(url, {
+            const res = await fetch(`/api/courses/?semester_id=${semId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            const resources = await response.json();
-            const container = document.getElementById('resourcesContainer');
-            
-            if (resources.length === 0) {
-                container.innerHTML = '<div class="bg-white p-10 rounded-lg shadow-sm border border-dashed border-gray-300 text-center text-gray-500 italic">No resources available for this semester yet.</div>';
+            const courses = await res.json();
+            const container = document.getElementById('coursesContainer');
+
+            if (courses.length === 0) {
+                container.innerHTML = '<div class="col-span-full bg-white p-10 rounded-lg shadow-sm border border-dashed border-gray-300 text-center text-gray-500 italic">No courses added for this semester yet.</div>';
                 return;
             }
 
-            // Group resources by subject
-            const groupedResources = resources.reduce((acc, resource) => {
-                const subject = resource.subject || 'Uncategorized';
-                if (!acc[subject]) {
-                    acc[subject] = [];
-                }
-                acc[subject].push(resource);
-                return acc;
-            }, {});
-
-            // Generate HTML for each subject group
-            let html = '';
-            for (const [subject, items] of Object.entries(groupedResources)) {
-                html += `
-                    <div class="mb-8">
-                        <h2 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                            ${subject}
-                        </h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            ${items.map(item => `
-                                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 flex flex-col justify-between hover:shadow-md transition-shadow group">
-                                    <div>
-                                        <div class="flex justify-between items-start">
-                                            <h3 class="font-bold text-gray-900 mb-1 line-clamp-2" title="${item.title}">${item.title}</h3>
-                                            ${currentUserRole >= 3 ? `
-                                                <button onclick="deleteResource(${item.id})" class="text-red-400 hover:text-red-600 opacity-0 md:opacity-0 group-hover:opacity-100 opacity-100 transition-opacity ml-2 flex-shrink-0" title="Delete Resource">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                </button>
-                                            ` : ''}
-                                        </div>
-                                        <p class="text-xs text-gray-500 mb-4">Added by ${item.author_name} • ${new Date(item.created_at).toLocaleDateString()}</p>
-                                    </div>
-                                    <a href="${item.link}" target="_blank" class="inline-flex items-center justify-center w-full px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 rounded-md text-sm font-medium transition-colors">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                        Download / View
-                                    </a>
-                                </div>
-                            `).join('')}
+            container.innerHTML = courses.map(course => `
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between hover:shadow-md transition-all hover:-translate-y-1 group cursor-pointer" onclick="window.location.href='/course/${course.id}'">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded uppercase tracking-wider">${course.code}</span>
+                            ${currentUserRole >= 3 ? `
+                                <button onclick="event.stopPropagation(); deleteCourse(${course.id})" class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            ` : ''}
                         </div>
+                        <h3 class="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">${course.name}</h3>
                     </div>
-                `;
-            }
-            container.innerHTML = html;
-
-        } catch (error) {
-            console.error('Error loading resources:', error);
-            document.getElementById('resourcesContainer').innerHTML = `<p class="text-red-500 text-center p-4 bg-red-50 rounded-lg border border-red-100">Failed to load resources. Please try again later.</p>`;
-        }
+                    <div class="mt-6 flex items-center text-sm font-medium text-gray-400">
+                        <span>View Resources</span>
+                        <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) { console.error('Error loading courses:', error); }
     }
 
-    document.getElementById('resourceForm')?.addEventListener('submit', async (e) => {
+    document.getElementById('courseForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const token = localStorage.getItem('token');
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData.entries());
-        // Convert semester_id to integer
-        if(data.semester_id) data.semester_id = parseInt(data.semester_id);
-        
-        const token = localStorage.getItem('token');
+        data.semester_id = parseInt(selectedSemesterId);
 
         try {
-            const response = await fetch('/api/resources/', {
+            const res = await fetch('/api/courses/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data)
             });
-
-            if (response.ok) {
-                // Keep the current semester selection but clear the rest
-                const currentSemId = document.getElementById('formSemesterSelect').value;
+            if (res.ok) {
                 e.target.reset();
-                document.getElementById('formSemesterSelect').value = currentSemId;
-                
-                // Reload the currently viewed semester to show the new resource
-                const activeFilterSem = document.getElementById('semesterFilter').value;
-                loadResources(activeFilterSem);
-            } else {
-                const err = await response.json();
-                alert('Failed to add resource: ' + (err.detail || 'Unknown error'));
+                loadCourses(document.getElementById('semesterFilter').value);
             }
-        } catch (error) {
-            console.error('Error adding resource:', error);
-        }
+        } catch (error) { console.error('Error adding course:', error); }
     });
 
-    async function deleteResource(id) {
-        if (!confirm('Are you sure you want to delete this resource?')) return;
+    async function deleteCourse(id) {
+        if (!confirm('Delete this course and all its resources?')) return;
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch(`/api/resources/${id}`, {
+            const res = await fetch(`/api/courses/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (response.ok) {
-                const activeFilterSem = document.getElementById('semesterFilter').value;
-                loadResources(activeFilterSem);
-            } else {
-                alert('Failed to delete resource.');
-            }
-        } catch (error) {
-            console.error('Error deleting resource:', error);
-        }
+            if (res.ok) loadCourses(document.getElementById('semesterFilter').value);
+        } catch (error) { console.error('Error deleting course:', error); }
     }
 
-    // Initialize
     initializePage();
 </script>
 {% endblock %}

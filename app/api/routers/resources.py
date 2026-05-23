@@ -10,17 +10,20 @@ router = APIRouter()
 
 @router.get("/", response_model=List[ResourceResponse])
 def get_resources(
+    course_id: Optional[int] = Query(None, description="Course ID to filter by"),
     semester_code: Optional[str] = Query(None, description="Semester code to filter by"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Fetch academic resources (Role >= 1), optionally filtered by semester"""
+    """Fetch academic resources (Role >= 1), optionally filtered by course or semester"""
     query = db.query(Resource)
     
-    if semester_code:
+    if course_id:
+        query = query.filter(Resource.course_id == course_id)
+    elif semester_code:
         semester = db.query(Semester).filter(Semester.code == semester_code).first()
         if not semester:
-            return [] # No resources for a non-existent semester
+            return []
         query = query.filter(Resource.semester_id == semester.id)
     else:
         # Default to current semester
@@ -39,10 +42,11 @@ def create_resource(
     """Create a new academic resource (Role >= 3)"""
     new_resource = Resource(
         title=resource_in.title,
-        subject=resource_in.subject,
         link=resource_in.link,
+        category=resource_in.category,
         author_name=current_user.name,
-        semester_id=resource_in.semester_id
+        semester_id=resource_in.semester_id,
+        course_id=resource_in.course_id
     )
     db.add(new_resource)
     db.commit()

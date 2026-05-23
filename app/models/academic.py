@@ -11,7 +11,19 @@ class Semester(Base):
     name = Column(String) # e.g., 'Summer 2026'
     is_current = Column(Boolean, default=False)
     
+    courses = relationship("Course", back_populates="semester")
     resources = relationship("Resource", back_populates="semester")
+
+class Course(Base):
+    __tablename__ = "courses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String, index=True) # e.g., 'SWE112'
+    name = Column(String) # e.g., 'Software Engineering'
+    semester_id = Column(Integer, ForeignKey("semesters.id"))
+
+    semester = relationship("Semester", back_populates="courses")
+    resources = relationship("Resource", back_populates="course")
 
 class Routine(Base):
     __tablename__ = "routines"
@@ -39,10 +51,12 @@ class Resource(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
-    subject = Column(String, index=True)
     link = Column(String)
+    category = Column(String, default='Other') # e.g., 'Shared Link', 'BLC Link', 'Notes', 'Other'
     author_name = Column(String)
     semester_id = Column(Integer, ForeignKey("semesters.id"), nullable=True)
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     semester = relationship("Semester", back_populates="resources")
+    course = relationship("Course", back_populates="resources")

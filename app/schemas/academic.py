@@ -64,11 +64,26 @@ class SemesterResponse(SemesterBase):
     class Config:
         from_attributes = True
 
+class CourseBase(BaseModel):
+    code: str
+    name: str
+    semester_id: int
+
+class CourseCreate(CourseBase):
+    pass
+
+class CourseResponse(CourseBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
 class ResourceBase(BaseModel):
     title: str
-    subject: str
     link: str
+    category: str
     semester_id: int
+    course_id: int
 
 class ResourceCreate(ResourceBase):
     pass

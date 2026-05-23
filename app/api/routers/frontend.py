@@ -43,3 +43,8 @@ async def profile_page(request: Request, db: Session = Depends(get_db)):
 async def resources_page(request: Request, db: Session = Depends(get_db)):
     global_ads = get_global_ads_enabled(db)
     return templates.TemplateResponse(request=request, name="resources.html", context={"request": request, "global_ads_enabled": global_ads})
+
+@router.get("/course/{course_id}", response_class=HTMLResponse)
+async def course_detail_page(request: Request, course_id: int, db: Session = Depends(get_db)):
+    global_ads = get_global_ads_enabled(db)
+    return templates.TemplateResponse(request=request, name="course_detail.html", context={"request": request, "course_id": course_id, "global_ads_enabled": global_ads})
