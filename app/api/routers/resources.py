@@ -4,7 +4,7 @@ from typing import List, Optional
 from app.core.dependencies import get_db, get_current_user, get_current_cr
 from app.models.academic import Resource, Semester
 from app.models.user import User
-from app.schemas.academic import ResourceCreate, ResourceResponse
+from app.schemas.academic import ResourceCreate, ResourceUpdate, ResourceResponse
 
 router = APIRouter()
 
@@ -52,6 +52,26 @@ def create_resource(
     db.commit()
     db.refresh(new_resource)
     return new_resource
+
+@router.patch("/{resource_id}", response_model=ResourceResponse)
+def update_resource(
+    resource_id: int,
+    resource_in: ResourceUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_cr)
+):
+    """Update an academic resource (Role >= 3)"""
+    resource = db.query(Resource).filter(Resource.id == resource_id).first()
+    if not resource:
+        raise HTTPException(status_code=404, detail="Resource not found")
+    
+    update_data = resource_in.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(resource, field, value)
+    
+    db.commit()
+    db.refresh(resource)
+    return resource
 
 @router.delete("/{resource_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_resource(

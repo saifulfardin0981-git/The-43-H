@@ -93,6 +93,13 @@ class ResourceBase(BaseModel):
 class ResourceCreate(ResourceBase):
     pass
 
+class ResourceUpdate(BaseModel):
+    title: Optional[str] = None
+    link: Optional[str] = None
+    category: Optional[str] = None
+    semester_id: Optional[int] = None
+    course_id: Optional[int] = None
+
 class ResourceResponse(ResourceBase):
     id: int
     author_name: str

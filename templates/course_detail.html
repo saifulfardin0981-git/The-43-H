@@ -18,18 +18,21 @@
 
 <!-- Add Resource Form (Role >= 3) -->
 <div id="addResourceSection" class="hidden mb-10 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-blue-200 dark:border-blue-900 transition-colors duration-300">
-    <h2 class="text-xl font-semibold text-blue-800 dark:text-blue-300 mb-4 flex items-center">
+    <h2 id="resourceFormTitle" class="text-xl font-semibold text-blue-800 dark:text-blue-300 mb-4 flex items-center">
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
         Add New Resource
     </h2>
     <form id="resourceForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <input type="hidden" name="resource_id" id="edit_resource_id">
         <div class="md:col-span-1">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
             <select name="category" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border bg-white dark:bg-gray-700 dark:text-white">
                 <option value="Shared Link">Shared Link</option>
                 <option value="BLC Link">BLC Link</option>
+                <option value="Syllabus">Syllabus</option>
                 <option value="Notes">Notes</option>
                 <option value="Slides">Slides</option>
+                <option value="Previous Question">Previous Question</option>
                 <option value="Book">Book</option>
                 <option value="Other">Other</option>
             </select>
@@ -43,8 +46,11 @@
             <input type="url" name="link" required placeholder="https://..." class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border dark:bg-gray-700 dark:text-white">
         </div>
         <div class="md:col-span-4 flex justify-end mt-2">
-            <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors font-medium">
+            <button type="submit" id="resourceSubmitBtn" class="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors font-medium">
                 Add Resource
+            </button>
+            <button type="button" id="cancelResourceEditBtn" onclick="cancelResourceEdit()" class="hidden ml-2 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-colors font-medium">
+                Cancel
             </button>
         </div>
     </form>
@@ -55,8 +61,10 @@
     <button onclick="switchCategory('All')" id="tab-All" class="category-tab px-4 py-2 text-sm font-bold transition-all border-b-2 border-blue-600 text-blue-600 dark:text-blue-400">All Resources</button>
     <button onclick="switchCategory('Shared Link')" id="tab-SharedLink" class="category-tab px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all border-b-2 border-transparent">Shared Links</button>
     <button onclick="switchCategory('BLC Link')" id="tab-BLCLink" class="category-tab px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all border-b-2 border-transparent">BLC Links</button>
+    <button onclick="switchCategory('Syllabus')" id="tab-Syllabus" class="category-tab px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all border-b-2 border-transparent">Syllabus</button>
     <button onclick="switchCategory('Notes')" id="tab-Notes" class="category-tab px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all border-b-2 border-transparent">Notes</button>
     <button onclick="switchCategory('Slides')" id="tab-Slides" class="category-tab px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all border-b-2 border-transparent">Slides</button>
+    <button onclick="switchCategory('Previous Question')" id="tab-PreviousQuestion" class="category-tab px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all border-b-2 border-transparent">Previous Questions</button>
 </div>
 
 <div id="resourcesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -142,9 +150,14 @@
                 <div class="flex justify-between items-start mb-3">
                     <span class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">${r.category}</span>
                     ${currentUserRole >= 3 ? `
-                        <button onclick="deleteResource(${r.id})" class="text-red-400 hover:text-red-600 opacity-0 md:opacity-0 group-hover:opacity-100 opacity-100 transition-opacity">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
+                        <div class="flex space-x-1 opacity-0 md:opacity-0 group-hover:opacity-100 opacity-100 transition-opacity">
+                            <button onclick="editResource(${r.id})" class="text-blue-500 hover:text-blue-700">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            </button>
+                            <button onclick="deleteResource(${r.id})" class="text-red-400 hover:text-red-600">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
                     ` : ''}
                 </div>
                 <h3 class="font-bold text-gray-800 dark:text-white mb-4 line-clamp-2">${r.title}</h3>
@@ -158,22 +171,49 @@
         `).join('');
     }
 
+    function editResource(id) {
+        const res = allResources.find(r => r.id === id);
+        if (!res) return;
+        document.getElementById('edit_resource_id').value = res.id;
+        document.querySelector('[name="category"]').value = res.category;
+        document.querySelector('[name="title"]').value = res.title;
+        document.querySelector('[name="link"]').value = res.link;
+        document.getElementById('resourceFormTitle').textContent = 'Edit Resource';
+        document.getElementById('resourceSubmitBtn').textContent = 'Update Resource';
+        document.getElementById('cancelResourceEditBtn').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelResourceEdit() {
+        document.getElementById('resourceForm').reset();
+        document.getElementById('edit_resource_id').value = '';
+        document.getElementById('resourceFormTitle').textContent = 'Add New Resource';
+        document.getElementById('resourceSubmitBtn').textContent = 'Add Resource';
+        document.getElementById('cancelResourceEditBtn').classList.add('hidden');
+    }
+
     document.getElementById('resourceForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData.entries());
+        const resourceId = data.resource_id;
+        delete data.resource_id;
+        
         data.course_id = courseId;
         data.semester_id = currentSemesterId;
 
+        const url = resourceId ? `/api/resources/${resourceId}` : '/api/resources/';
+        const method = resourceId ? 'PATCH' : 'POST';
+
         try {
-            const res = await fetch('/api/resources/', {
-                method: 'POST',
+            const res = await fetch(url, {
+                method: method,
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data)
             });
             if (res.ok) {
-                e.target.reset();
+                cancelResourceEdit();
                 loadResources();
             }
         } catch (e) { console.error(e); }
